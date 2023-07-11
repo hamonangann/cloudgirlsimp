@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gocolly/colly"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -23,9 +24,12 @@ func main() {
 
 	c.OnResponse(func(r *colly.Response) {
 		if strings.Index(r.Headers.Get("Content-Type"), "image") > -1 {
-			fmt.Println("downloading image:", r.FileName())
-			r.Save(ResultDir + r.FileName())
-			return
+			_, err := os.Stat(ResultDir + r.FileName())
+			if os.IsNotExist(err) { // download if file doesn't exist
+				fmt.Println("downloading image:", r.FileName())
+				r.Save(ResultDir + r.FileName())
+				return
+			}
 		}
 	})
 
